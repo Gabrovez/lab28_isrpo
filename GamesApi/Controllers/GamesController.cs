@@ -11,6 +11,11 @@ public class GamesController : ControllerBase {
     public ActionResult<List<Game>> GetAll(){
         return Ok(GamesStore.Games);
     }
+    [HttpGet("favourites")]
+    public ActionResult<List<Game>> GetFavourites() {
+        var favourites = GamesStore.Games.Where(g => g.isFavourite).ToList();
+        return Ok(favourites);
+    }
 
     [HttpGet("{id}")]
     public ActionResult<Game> GetById(int id) {
@@ -27,7 +32,11 @@ public class GamesController : ControllerBase {
     public ActionResult<Game> Create([FromBody] Game game) {
         game.Id = GamesStore.NextId();
         GamesStore.Games.Add(game);
-        return CreatedAtAction(nameof(GetById), new { id = game.Id }, game);
+        if( game.Title == ""){
+            return BadRequest( new { message = "Название игры не может быть пустым"});
+        } else {
+            return CreatedAtAction(nameof(GetById), new { id = game.Id }, game);
+        }
     }
 
     [HttpDelete("{id}")]
